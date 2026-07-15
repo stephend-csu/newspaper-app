@@ -292,95 +292,67 @@ $(window).on('load', function() {
       }
     });
 
-    if (detectedNewspapers.size > 0) {
-      var pickerHtml = $('<div id="newspaper-color-picker"></div>');
-      var selectorBar = $('<div class="paper-selector-bar"></div>');
-      var paletteBar = $('<div class="color-palette-bar" style="display: none;"></div>');
+      var pickerHtml = $('<div id="newspaper-color-picker" style="padding:15px; margin:10px 10px 20px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;"></div>');
+      var selectorBar = $('<div class="paper-selector-bar" style="display:flex; flex-wrap:wrap; gap:10px;"></div>');
       
       var defaultPaperColors = {
-        'EBT': 0, // Red
-        'WSJ': 1, // Gray
-        'NYT': 2, // Blue
-        'SFC': 3, // Yellow
+        'EBT': '#ef4444',
+        'WSJ': '#64748b',
+        'NYT': '#3b82f6',
+        'SFC': '#eab308',
+        'UST': '#22c55e'
       };
       
-      var paperSelections = {}; // paper -> colorIndex
+      var defaultColorsList = ['#a855f7', '#f97316', '#ec4899', '#14b8a6', '#6366f1'];
+      var indexCounter = 0;
       
-      var colorPalette = [
-        { name: 'Red', bg: '#fee2e2', text: '#991b1b', dot: '#ef4444' },
-        { name: 'Gray', bg: '#f1f5f9', text: '#334155', dot: '#64748b' },
-        { name: 'Blue', bg: '#dbeafe', text: '#1e40af', dot: '#3b82f6' },
-        { name: 'Yellow', bg: '#fef9c3', text: '#854d0e', dot: '#eab308' },
-        { name: 'Green', bg: '#dcfce7', text: '#166534', dot: '#22c55e' },
-        { name: 'Purple', bg: '#f3e8ff', text: '#6b21a8', dot: '#a855f7' },
-        { name: 'Orange', bg: '#ffedd5', text: '#9a3412', dot: '#f97316' },
-        { name: 'Pink', bg: '#fce7f3', text: '#9d174d', dot: '#ec4899' },
-        { name: 'Teal', bg: '#ccfbf1', text: '#115e59', dot: '#14b8a6' },
-        { name: 'Indigo', bg: '#e0e7ff', text: '#3730a3', dot: '#6366f1' }
-      ];
+      var paperSelections = {};
       
       var styleTag = $('<style id="dynamic-newspaper-styles"></style>');
       $('head').append(styleTag);
       
+      function hexToRgba(hex, alpha) {
+        var r = parseInt(hex.slice(1, 3), 16),
+            g = parseInt(hex.slice(3, 5), 16),
+            b = parseInt(hex.slice(5, 7), 16);
+        return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+      }
+      
       function updateBadgeStyles() {
         var css = '';
         Object.keys(paperSelections).forEach(function(paper) {
-          var colorIndex = paperSelections[paper];
-          var pal = colorPalette[colorIndex];
-          css += '.newspaper-badge[data-paper="' + paper + '"] { background-color: ' + pal.bg + '; color: ' + pal.text + '; border: 1px solid ' + pal.dot + '40; }\n';
+          var hex = paperSelections[paper];
+          var bg = hexToRgba(hex, 0.15);
+          var border = hexToRgba(hex, 0.4);
+          css += '.newspaper-badge[data-paper="' + paper + '"] { background-color: ' + bg + ' !important; color: ' + hex + ' !important; border: 1px solid ' + border + ' !important; }\n';
         });
         styleTag.text(css);
       }
       
-      var activePaperForColoring = null;
-      
-      colorPalette.forEach(function(pal, idx) {
-        var swatch = $('<span class="color-swatch" data-index="' + idx + '" style="background-color: ' + pal.dot + ';" title="' + pal.name + '"></span>');
-        swatch.on('click', function() {
-          if (activePaperForColoring) {
-            paperSelections[activePaperForColoring] = idx;
-            $('.paper-pill[data-paper="' + activePaperForColoring + '"] .color-dot').css('background-color', pal.dot);
-            updateBadgeStyles();
-            $('.color-swatch').removeClass('selected');
-            swatch.addClass('selected');
-          }
-        });
-        paletteBar.append(swatch);
-      });
-      
-      var indexCounter = 4;
       detectedNewspapers.forEach(function(paper) {
-        var defIndex = (defaultPaperColors[paper] !== undefined) ? defaultPaperColors[paper] : indexCounter++;
-        if (defIndex >= 10) defIndex = defIndex % 10;
-        paperSelections[paper] = defIndex;
+        var hex = defaultPaperColors[paper];
+        if (!hex) {
+          hex = defaultColorsList[indexCounter % defaultColorsList.length];
+          indexCounter++;
+        }
+        paperSelections[paper] = hex;
         
-        var pal = colorPalette[defIndex];
-        var pill = $('<div class="paper-pill" data-paper="' + paper + '">' + paper + ' <span class="color-dot" style="background-color: ' + pal.dot + ';"></span></div>');
+        var pill = $('<div class="paper-pill" style="display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:6px; background:#fff; border:1px solid #e2e8f0; font-weight:600; font-size:0.9em; box-shadow:0 1px 2px rgba(0,0,0,0.05);">' + paper + ' </div>');
         
-        pill.on('click', function() {
-          if (activePaperForColoring === paper) {
-            activePaperForColoring = null;
-            $('.paper-pill').removeClass('active');
-            paletteBar.slideUp(200);
-          } else {
-            activePaperForColoring = paper;
-            $('.paper-pill').removeClass('active');
-            pill.addClass('active');
-            
-            var currentIdx = paperSelections[paper];
-            $('.color-swatch').removeClass('selected');
-            $('.color-swatch[data-index="' + currentIdx + '"]').addClass('selected');
-            
-            paletteBar.slideDown(200);
-          }
+        var colorInput = $('<input type="color" value="' + hex + '" style="border:none; width:24px; height:24px; padding:0; cursor:pointer; background:transparent;">');
+        
+        colorInput.on('input', function() {
+          paperSelections[paper] = $(this).val();
+          updateBadgeStyles();
         });
+        
+        pill.append(colorInput);
         selectorBar.append(pill);
       });
       
-      pickerHtml.append('<div class="picker-instructions">Customize newspaper colors:</div>');
+      pickerHtml.append('<div class="picker-instructions" style="margin-bottom:10px; font-weight:600; color:#475569;">Customize newspaper colors:</div>');
       pickerHtml.append(selectorBar);
-      pickerHtml.append(paletteBar);
-      $('#narration').prepend(pickerHtml);
+      $('#top').append(pickerHtml);
       
       updateBadgeStyles();
     }
