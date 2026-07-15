@@ -292,6 +292,7 @@ $(window).on('load', function() {
       }
     });
 
+    if (detectedNewspapers.size > 0) {
       var pickerHtml = $('<div id="newspaper-color-picker" style="padding:15px; margin:10px 10px 20px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;"></div>');
       var selectorBar = $('<div class="paper-selector-bar" style="display:flex; flex-wrap:wrap; gap:10px;"></div>');
       
