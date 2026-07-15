@@ -1,0 +1,328 @@
+body {
+  padding: 0px;
+  margin: 0px;
+  font-family: "Helvetica", sans-serif;
+  overflow: hidden;
+}
+
+#map {
+  height: 200px;
+  width: 100vw;
+  position: absolute;
+  border-bottom: 3px solid orange;
+  top: 0;
+  left: 0;
+}
+
+#narration {
+  position: absolute;
+  top: 203px;
+  width: 100vw;
+  height: calc(100vh - 203px);
+  z-index: 80;
+}
+
+#contents {
+  padding: 0;
+  width: 100%;
+  margin-top: 0; /*Adjust if Title header needs more space */
+  height: 100%; /* Adjust to fit max Description length, one setting for all; alternative is 100% */
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+#top {
+  height: auto;
+  min-height: 40px;
+  margin: 0;
+  padding: 10px;
+  border-bottom: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+}
+
+#space-at-the-bottom {
+  height: 200px;
+  margin: 0;
+  text-align: center;
+  padding-top: 150px;
+}
+
+#title {
+  position: absolute;
+  left: 0;
+  top: 203px;
+  background-color: white;
+  width: 100vw;
+  z-index: 100;
+  margin: 0;
+  padding: 0;
+  visibility: hidden;
+  font-weight: bold;
+  text-align: center;
+}
+
+.chapter-container {
+  /* margin + padding = chapterContainerMargin in script.js */
+  /* Important for scrolling! */
+  margin: 50px 0 0 0;
+  padding: 20px 0 0 0;
+  text-align: center;
+}
+
+.chapter-container img {
+  height: auto;
+  width: auto;
+  max-height: 100%;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+
+  /* Three lines that center vertically */
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.img-container {
+  margin: 0;
+  margin-bottom: 5px;
+  height: 200px;
+  max-height: 200px;
+  width: 100%;
+}
+
+.audio-container {
+  margin: 0;
+  margin-bottom: 5px;
+  height: 60px;
+  max-height: 60px;
+  width: 100%;
+}
+
+.chapter-header {
+  display: block;
+  text-align: center;
+  font-size: 1.2em;
+  padding: 0 5px;
+}
+
+.source {
+  font-size: 9pt;
+  font-style: italic;
+  color: gray;
+}
+a.source:visited {
+  color: grey;
+}
+
+.description {
+  margin: 20px;
+  text-align: left;
+  font-size: 11pt;
+  padding: 20px;
+}
+
+.in-focus {
+  opacity: 1.0;
+}
+
+.out-focus {
+  opacity: 0.3;
+}
+
+.leaflet-control-attribution {
+  visibility: hidden;
+}
+
+.leaflet-marker-icon {
+  opacity: 0.75;
+}
+
+/*
+  By default, current (active) marker is orange.
+  If you want to change the color, see options here: https://github.com/coryasilva/Leaflet.ExtraMarkers/blob/master/src/assets/css/leaflet.extra-markers.css
+*/
+.marker-active {
+  background-position: -72px 0 !important;
+}
+
+/* Storymap logo image above the title */
+#logo {
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  padding: 10px;
+  max-width: 100%;
+}
+
+#logo img {
+  max-height: 100%;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+#header {
+  padding: 5px 0;
+  text-align: center;
+  color: #333;
+}
+
+/* Storymap title & subtitle */
+h1 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: normal;
+}
+
+/* Custom Newspaper and Delivery Styles */
+.newspaper-container {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 8px 0;
+  flex-wrap: wrap;
+}
+
+.newspaper-badge {
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.maps-link-container {
+  margin: 8px 0 12px 0;
+}
+
+.maps-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #1a0dab;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.9em;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.maps-link:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.maps-link i {
+  color: #ef4444;
+}
+
+/* Dynamic Newspaper Color Picker UI */
+#newspaper-color-picker {
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin: 10px;
+  text-align: left;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.picker-instructions {
+  font-size: 0.8em;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.paper-selector-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.paper-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.paper-pill:hover, .paper-pill.active {
+  border-color: #64748b;
+  background-color: #f1f5f9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.paper-pill.active {
+  background-color: #e2e8f0;
+  border-color: #475569;
+}
+
+.paper-pill .color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid rgba(0,0,0,0.1);
+  transition: background-color 0.2s ease;
+}
+
+.color-palette-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-top: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.color-swatch:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.color-swatch.selected {
+  border-color: #0f172a;
+  transform: scale(1.1);
+}
