@@ -299,7 +299,7 @@ $(window).on('load', function() {
       var defaultPaperColors = {
         'EBT': '#ef4444',
         'WSJ': '#64748b',
-        'NYT': '#3b82f6',
+        'NYT': '#4169e1',
         'SFC': '#eab308',
         'UST': '#22c55e'
       };
@@ -353,7 +353,7 @@ $(window).on('load', function() {
       
       pickerHtml.append('<div class="picker-instructions" style="margin-bottom:10px; font-weight:600; color:#475569;">Customize newspaper colors:</div>');
       pickerHtml.append(selectorBar);
-      $('#top').append(pickerHtml);
+      pickerHtml.insertAfter('#top');
       
       updateBadgeStyles();
     }

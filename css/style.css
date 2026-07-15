@@ -201,7 +201,7 @@ h2 {
 }
 
 .maps-link-container {
-  margin: 14px 0 6px 0; /* spaced further down */
+  margin: 10px 0 6px 0; /* brought up a bit */
 }
 
 .maps-link {
@@ -211,7 +211,7 @@ h2 {
   color: #64748b; /* subtle slate gray */
   font-weight: 500;
   text-decoration: none;
-  font-size: 0.85em; /* subtle text size */
+  font-size: 1.05em; /* 25% larger */
   padding: 4px 8px;
   border-radius: 4px;
   background-color: transparent; /* transparent/subtle style */
@@ -226,7 +226,7 @@ h2 {
 
 .maps-link i {
   color: #94a3b8; /* subtle gray icon */
-  font-size: 0.9em;
+  font-size: 1.1em;
 }
 
 .maps-link:hover i {
