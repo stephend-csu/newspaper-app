@@ -5,6 +5,7 @@ import json
 import urllib.request
 import urllib.parse
 import smtplib
+import threading
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import Flask, request, render_template_string, flash
@@ -555,6 +556,41 @@ def send_notification_email(recipient_email, github_url):
         print(f"Error sending email: {e}")
         return False, str(e)
 
+def process_and_push_background(pdf_path, email_address, github_token, repo_url):
+    try:
+        # 2. Run PDF process & route optimization
+        process_pdf.main()
+        
+        # Check Chapters.csv was updated
+        chapters_path = os.path.join(os.getcwd(), "csv", "Chapters.csv")
+        if not os.path.exists(chapters_path):
+            print("Processing completed, but Chapters.csv was not generated.")
+            return
+            
+        # Load the newly written CSV bytes
+        with open(chapters_path, "rb") as f:
+            csv_bytes = f.read()
+            
+        # 3. Commit/Push to GitHub
+        github_pushed = False
+        if github_token and "github.com/" in repo_url:
+            parts = repo_url.split("github.com/")[1].split("/")
+            if len(parts) >= 2:
+                owner = parts[0]
+                repo = parts[1].replace(".git", "")
+                try:
+                    github_pushed = push_to_github(github_token, owner, repo, "csv/Chapters.csv", csv_bytes)
+                except Exception as e:
+                    print(f"GitHub push failed: {e}")
+                    
+        # 4. Email Notification
+        if github_pushed and email_address:
+            send_notification_email(email_address, repo_url)
+            
+    except Exception as e:
+        print(f"Error in background processing: {e}")
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
@@ -569,62 +605,15 @@ def index():
         pdf_path = os.path.join(os.getcwd(), "MyDistrictNet.pdf")
         pdf_file.save(pdf_path)
         
-        # 2. Run PDF process & route optimization
-        try:
-            process_pdf.main()
-        except Exception as e:
-            flash(f"Error processing route data: {e}", "error")
-            return render_template_string(HTML_TEMPLATE)
-            
-        # Check Chapters.csv was updated
-        chapters_path = os.path.join(os.getcwd(), "csv", "Chapters.csv")
-        if not os.path.exists(chapters_path):
-            flash("Processing completed, but Chapters.csv was not generated.", "error")
-            return render_template_string(HTML_TEMPLATE)
-            
-        # Load the newly written CSV bytes
-        with open(chapters_path, "rb") as f:
-            csv_bytes = f.read()
-            
-        # 3. Commit/Push to GitHub
         github_token = os.environ.get("GITHUB_TOKEN")
         repo_url = os.environ.get("GITHUB_REPO_URL", DEFAULT_REPO_URL)
         
-        github_pushed = False
-        github_err = "GITHUB_TOKEN environment variable not set."
+        # Start background processing to avoid Render's 100-second timeout
+        thread = threading.Thread(target=process_and_push_background, args=(pdf_path, email_address, github_token, repo_url))
+        thread.daemon = True
+        thread.start()
         
-        if github_token and "github.com/" in repo_url:
-            parts = repo_url.split("github.com/")[1].split("/")
-            if len(parts) >= 2:
-                owner = parts[0]
-                repo = parts[1].replace(".git", "")
-                try:
-                    github_pushed = push_to_github(github_token, owner, repo, "csv/Chapters.csv", csv_bytes)
-                except Exception as e:
-                    github_err = str(e)
-        
-        # 4. Email Notification
-        email_sent = False
-        email_err = None
-        if github_pushed:
-            email_sent, email_err = send_notification_email(email_address, repo_url)
-            
-        # 5. Flash results
-        success_message = "<strong>Route Processed Successfully!</strong><br>"
-        success_message += "• PDF parsed, geocoded, and optimized locally.<br>"
-        
-        if github_pushed:
-            success_message += "• Updated CSV pushed directly to GitHub.<br>"
-        else:
-            success_message += f"<span style='color: #f87171;'>• GitHub upload skipped: {github_err}</span><br>"
-            success_message += "• Note: You can manually upload the updated <code>csv/Chapters.csv</code> in the project folder to your repo.<br>"
-            
-        if email_sent:
-            success_message += "• Notification email sent successfully."
-        elif github_pushed:
-            success_message += f"<span style='color: #f87171;'>• Email notification failed: {email_err or 'credentials missing'}</span>"
-            
-        flash(success_message, "success" if github_pushed else "info")
+        flash("<strong>Processing Started!</strong><br>Your PDF has been received and is being processed in the background. Because geocoding all addresses takes a couple of minutes, this avoids server timeouts. You will receive an email shortly once the route is published to GitHub!", "info")
         
     return render_template_string(HTML_TEMPLATE)
 
