@@ -267,16 +267,16 @@ $(window).on('load', function() {
 
       var mapsLinkContainer = '';
       if (c['Maps Link']) {
-        mapsLinkContainer = $('<div class="maps-link-container"><a href="' + c['Maps Link'] + '" target="_blank" class="maps-link"><i class="fas fa-map-marker-alt"></i> Google Map</a></div>');
+        mapsLinkContainer = $('<div class="maps-link-container"><a href="' + c['Maps Link'] + '" target="_blank" class="maps-link"><i class="fas fa-map-marker-alt"></i> Open in Maps</a></div>');
       }
 
       container
         .append('<p class="chapter-header">' + displayAddress + '</p>')
         .append(newspapers.length > 0 ? newspaperContainer : '')
-        .append(c['Maps Link'] ? mapsLinkContainer : '')
         .append(media ? mediaContainer : '')
         .append(media ? source : '')
-        .append('<p class="description">' + c['Description'] + '</p>');
+        .append('<p class="description">' + c['Description'] + '</p>')
+        .append(c['Maps Link'] ? mapsLinkContainer : '');
 
       $('#contents').append(container);
 
@@ -380,7 +380,7 @@ $(window).on('load', function() {
       pickerHtml.append('<div class="picker-instructions">Customize newspaper colors:</div>');
       pickerHtml.append(selectorBar);
       pickerHtml.append(paletteBar);
-      $('#top').append(pickerHtml);
+      $('#narration').prepend(pickerHtml);
       
       updateBadgeStyles();
     }

@@ -32,6 +32,15 @@ def geocode_census(query):
                 lat = m.get("coordinates", {}).get("y")
                 lon = m.get("coordinates", {}).get("x")
                 matched_addr = m.get("matchedAddress", "")
+                
+                # Geocode filter: reject matches that are more than 30 miles from our Concord starting depot.
+                # This prevents matching duplicate street names in far-away counties.
+                if lat is not None and lon is not None:
+                    dist = haversine(START_LAT, START_LON, lat, lon)
+                    if dist > 30.0:
+                        print(f"  Ignored far-away geocode match ({dist:.1f} mi): {matched_addr}")
+                        continue
+                
                 parts = [p.strip() for p in matched_addr.split(",")]
                 city = None
                 if len(parts) >= 3:
@@ -198,12 +207,16 @@ def solve_tsp(addresses_dict):
     }]
     
     for addr, data in addresses_dict.items():
+        # Capitalize street and city in title case for real-life sign representation
+        street_title = data['street'].strip().title()
+        city_title = data['city'].strip().title()
+        
         points.append({
-            "address": f"{addr}, {data['city']}, CA",
+            "address": f"{data['number']} {street_title}, {city_title}, CA",
             "lat": data["lat"],
             "lon": data["lon"],
             "papers": " ".join(sorted(data["papers"])),
-            "city": data["city"]
+            "city": city_title
         })
         
     N = len(points)
@@ -250,18 +263,18 @@ def solve_tsp(addresses_dict):
     return [points[idx] for idx in best_tour]
 
 def main():
-    workspace = r"c:\Users\stardust\Desktop\baynews-main"
+    workspace = os.path.dirname(os.path.abspath(__file__))
     pdf_path = os.path.join(workspace, "MyDistrictNet.pdf")
     csv_dir = os.path.join(workspace, "csv")
     chapters_csv = os.path.join(csv_dir, "Chapters.csv")
     
-    # Read existing CSV for metadata preservation
+    # Read existing CSV for metadata preservation (using case-insensitive comparison)
     existing_meta = {}
     if os.path.exists(chapters_csv):
         with open(chapters_csv, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                addr = row["Chapter"].split(",")[0].strip()
+                addr = row["Chapter"].split(",")[0].strip().upper()
                 existing_meta[addr] = row
                 
     # Extract PDF
@@ -292,7 +305,7 @@ def main():
         writer.writeheader()
         
         for i, pt in enumerate(optimized_route):
-            addr_key = pt["address"].split(",")[0].strip()
+            addr_key = pt["address"].split(",")[0].strip().upper()
             meta = existing_meta.get(addr_key, {})
             
             # Format maps link
@@ -302,7 +315,7 @@ def main():
             row_data = {
                 "Chapter": pt["address"],
                 "Media Link": meta.get("Media Link", ""),
-                "Media Credit": meta.get("Media Credit", "Open in Maps"),
+                "Media Credit": "Open in Maps",
                 "Media Credit Link": maps_link if i == 0 else meta.get("Media Credit Link", maps_link),
                 "Description": meta.get("Description", "Start Address" if i == 0 else ""),
                 "Zoom": meta.get("Zoom", "16"),
