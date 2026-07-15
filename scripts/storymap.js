@@ -369,12 +369,19 @@ $(window).on('load', function() {
       });
     }
 
-    // For each block (chapter), calculate how many pixels above it
-    pixelsAbove[0] = -100;
-    for (i = 1; i < chapters.length; i++) {
-      pixelsAbove[i] = pixelsAbove[i-1] + $('div#container' + (i-1)).height() + chapterContainerMargin;
-    }
-    pixelsAbove.push(Number.MAX_VALUE);
+    // Add margin to contents to prevent it from being hidden under the absolutely positioned #title
+    setTimeout(function() {
+      var titleHeight = $('#title').outerHeight(true) || 0;
+      $('#contents').css('padding-top', titleHeight + 'px');
+      
+      // Recalculate pixelsAbove using actual DOM offsets for robustness
+      pixelsAbove = [];
+      for (var i = 0; i < chapters.length; i++) {
+        var el = document.getElementById('container' + i);
+        pixelsAbove[i] = el ? el.offsetTop - 150 : 0;
+      }
+      pixelsAbove.push(Number.MAX_VALUE);
+    }, 100);
 
     $('div#contents').scroll(function() {
       var currentPosition = $(this).scrollTop();
